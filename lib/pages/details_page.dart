@@ -18,11 +18,13 @@ class _DetailsPageState extends State<DetailsPage>
     with TickerProviderStateMixin {
   late AnimationController _animationController;
   late AnimationController _animationControllerForFavIcon;
-  late AnimationController _animationControllerForSize;
+
   late Animation<Color?> colorAnimation;
   late Animation<Color?> colorAnimationForSize;
+  List<AnimationController>? sizeController;
   bool isAnimationCompleted = true;
   bool isDescriptionShown = true;
+  late List<SizeVO> sizeTemp;
   List<SizeVO> size = [
     SizeVO(size: "S"),
     SizeVO(size: "M"),
@@ -31,38 +33,44 @@ class _DetailsPageState extends State<DetailsPage>
     SizeVO(size: "XXL"),
   ];
   bool isSizeSelected = false;
+  double turn = 0.0;
 
   @override
   void initState() {
+    sizeTemp = size.map((e) {
+          e.sizeAnimationController = AnimationController(
+            vsync: this,
+            duration: kAnimationDurationForFavourite,
+            upperBound: 0.5,
+          );
+          e.colorAnimation = ColorTween(begin: Colors.white, end: Colors.purple)
+              .animate(e.sizeAnimationController!.view);
+          return e;
+        }).toList() ??
+        [];
+    print("Animation 1 ${size[0].colorAnimation}");
+    print("Animation 2 ${size[1].colorAnimation}");
     _animationController = AnimationController(
       vsync: this,
       duration: kAnimationDurationForFavourite,
       upperBound: 0.5,
     );
-    _animationControllerForSize = AnimationController(
-      vsync: this,
-      duration: kAnimationDurationForFavourite,
-      upperBound: 0.5,
-    );
+
     _animationControllerForFavIcon = AnimationController(
       vsync: this,
       duration: kAnimationDurationForFavourite,
-      upperBound: 0.5,
     );
     colorAnimation = ColorTween(begin: Colors.white, end: Colors.red)
         .animate(_animationControllerForFavIcon.view);
+
     colorAnimationForSize = ColorTween(begin: Colors.white, end: Colors.purple)
-        .animate(_animationControllerForSize.view);
-    // _animationController.addStatusListener((status) {
-    //   isAnimationCompleted = (status == AnimationStatus.completed);
-    //   // _animationController.repeat();
-    // });
+        .animate(_animationControllerForFavIcon.view);
+
     super.initState();
   }
 
   @override
   void dispose() {
-    _animationControllerForSize.dispose();
     _animationController.dispose();
     _animationControllerForFavIcon.dispose();
     super.dispose();
@@ -86,7 +94,7 @@ class _DetailsPageState extends State<DetailsPage>
                   if (isAnimationCompleted) {
                     _animationControllerForFavIcon.reverse();
                   } else {
-                    _animationControllerForFavIcon.repeat();
+                    _animationControllerForFavIcon.forward();
                   }
                 });
               },
@@ -94,26 +102,26 @@ class _DetailsPageState extends State<DetailsPage>
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: MARGIN_MEDIUM_2),
               child: ItemDetailsSectionView(
+                turn: turn,
                 isDescriptionShown: isDescriptionShown,
-                controller: _animationController,
-                controllerForSize: _animationControllerForSize,
+                controllerForSize: sizeTemp,
                 onTapShowDescription: () {
                   setState(() {
+                    turn += 0.5;
                     isDescriptionShown = !isDescriptionShown;
-                    if (_animationController.isDismissed) {
-                      _animationController.forward();
-                    } else {
-                      _animationController.reverse();
-                    }
                   });
                 },
                 isSizeSelected: isSizeSelected,
                 onTapSize: (index) {
                   setState(() {
-                    size[index].isSelected = !(size[index].isSelected ?? false);
+                    sizeTemp[index].isSelected =
+                        !(sizeTemp[index].isSelected ?? false);
                     // _animationControllerForSize.repeat();
-
-                    _animationControllerForSize.forward();
+                    if (sizeTemp[index].isSelected == false) {
+                      sizeTemp[index].sizeAnimationController?.reverse();
+                    } else {
+                      sizeTemp[index].sizeAnimationController?.forward();
+                    }
                   });
                 },
                 size: size,
@@ -131,23 +139,24 @@ class ItemDetailsSectionView extends StatelessWidget {
   ItemDetailsSectionView(
       {required this.isDescriptionShown,
       required this.onTapShowDescription,
-      required this.controller,
       required this.size,
       required this.isSizeSelected,
       required this.onTapSize,
       required this.animationColor,
+      required this.turn,
       required this.controllerForSize});
 
   final bool isDescriptionShown;
   final Function onTapShowDescription;
-  final AnimationController controller;
-  final AnimationController controllerForSize;
+
+  final List<SizeVO> controllerForSize;
 
   final List<SizeVO>? size;
   final Function(int) onTapSize;
   final bool isSizeSelected;
 
   final Animation<Color?> animationColor;
+  final double turn;
 
   @override
   Widget build(BuildContext context) {
@@ -168,7 +177,7 @@ class ItemDetailsSectionView extends StatelessWidget {
           height: kMARGIN18,
         ),
         DescriptionAndExpandIconView(
-            controller: controller, onTapShowDescription: onTapShowDescription),
+            turn: turn, onTapShowDescription: onTapShowDescription),
         SizedBox(
           height: kMARGIN18,
         ),
@@ -188,15 +197,15 @@ class ItemDetailsSectionView extends StatelessWidget {
               scrollDirection: Axis.horizontal,
               itemBuilder: (context, index) {
                 return AnimatedBuilder(
-                  animation: controllerForSize.view,
+                  animation:
+                      controllerForSize[index].sizeAnimationController!.view,
                   builder: (BuildContext context, Widget? child) {
                     return SizeItemView(
                       size: size?[index],
                       index: index,
                       isSizeSelected: size?[index].isSelected ?? false,
                       onTapSize: onTapSize,
-                      color: animationColor.value,
-                      animationColor: animationColor,
+                      color: controllerForSize[index].colorAnimation!.value,
                     );
                   },
                 );
@@ -208,20 +217,19 @@ class ItemDetailsSectionView extends StatelessWidget {
 }
 
 class SizeItemView extends StatelessWidget {
-  SizeItemView(
-      {required this.size,
-      required this.index,
-      required this.onTapSize,
-      this.isSizeSelected = false,
-      required this.color,
-      required this.animationColor});
+  SizeItemView({
+    required this.size,
+    required this.index,
+    required this.onTapSize,
+    this.isSizeSelected = false,
+    required this.color,
+  });
 
   final SizeVO? size;
   final int index;
   final Function(int) onTapSize;
   final bool isSizeSelected;
   final Color? color;
-  final Animation<Color?> animationColor;
 
   @override
   Widget build(BuildContext context) {
@@ -246,7 +254,7 @@ class SizeItemView extends StatelessWidget {
                   ),
                 ],
                 borderRadius: BorderRadius.circular(20),
-                color: (isSizeSelected) ? color : Colors.white,
+                color: color,
               ),
               child: Center(child: Text(size?.size ?? "")),
             ),
@@ -310,12 +318,12 @@ class ItemDescriptionView extends StatelessWidget {
 class DescriptionAndExpandIconView extends StatelessWidget {
   const DescriptionAndExpandIconView({
     Key? key,
-    required this.controller,
     required this.onTapShowDescription,
+    required this.turn,
   }) : super(key: key);
 
-  final AnimationController controller;
   final Function onTapShowDescription;
+  final double turn;
 
   @override
   Widget build(BuildContext context) {
@@ -326,16 +334,14 @@ class DescriptionAndExpandIconView extends StatelessWidget {
           style: TextStyle(fontSize: kMARGIN18),
         ),
         Spacer(),
-        AnimatedBuilder(
-          animation: controller.view,
-          builder: (context, _) => RotationTransition(
-            turns: Tween(begin: 0.0, end: 1.0).animate(controller),
-            child: IconButton(
-              icon: Icon(Icons.expand_more, size: 32),
-              onPressed: () {
-                onTapShowDescription();
-              },
-            ),
+        AnimatedRotation(
+          turns: turn,
+          duration: kAnimationDuration,
+          child: IconButton(
+            icon: Icon(Icons.expand_more, size: 32),
+            onPressed: () {
+              onTapShowDescription();
+            },
           ),
         ),
       ],
@@ -385,7 +391,7 @@ class ItemProfileSecrionView extends StatelessWidget {
                     animation: _animationController.view,
                     builder: (BuildContext context, Widget? child) {
                       return RotationTransition(
-                        turns: Tween(begin: 0.0, end: 2.0)
+                        turns: Tween<double>(begin: 0.0, end: 1.0)
                             .animate(_animationController),
                         child: FavouriteIconButtonVIew(
                           onTapFav: () {
