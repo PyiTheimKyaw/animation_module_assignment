@@ -16,15 +16,12 @@ class DetailsPage extends StatefulWidget {
 
 class _DetailsPageState extends State<DetailsPage>
     with TickerProviderStateMixin {
-  late AnimationController _animationController;
   late AnimationController _animationControllerForFavIcon;
 
   late Animation<Color?> colorAnimation;
-  late Animation<Color?> colorAnimationForSize;
-  List<AnimationController>? sizeController;
+
   bool isAnimationCompleted = true;
   bool isDescriptionShown = true;
-  late List<SizeVO> sizeTemp;
   List<SizeVO> size = [
     SizeVO(size: "S"),
     SizeVO(size: "M"),
@@ -37,25 +34,6 @@ class _DetailsPageState extends State<DetailsPage>
 
   @override
   void initState() {
-    sizeTemp = size.map((e) {
-          e.sizeAnimationController = AnimationController(
-            vsync: this,
-            duration: kAnimationDurationForFavourite,
-            upperBound: 0.5,
-          );
-          e.colorAnimation = ColorTween(begin: Colors.white, end: Colors.purple)
-              .animate(e.sizeAnimationController!.view);
-          return e;
-        }).toList() ??
-        [];
-    print("Animation 1 ${size[0].colorAnimation}");
-    print("Animation 2 ${size[1].colorAnimation}");
-    _animationController = AnimationController(
-      vsync: this,
-      duration: kAnimationDurationForFavourite,
-      upperBound: 0.5,
-    );
-
     _animationControllerForFavIcon = AnimationController(
       vsync: this,
       duration: kAnimationDurationForFavourite,
@@ -63,15 +41,11 @@ class _DetailsPageState extends State<DetailsPage>
     colorAnimation = ColorTween(begin: Colors.white, end: Colors.red)
         .animate(_animationControllerForFavIcon.view);
 
-    colorAnimationForSize = ColorTween(begin: Colors.white, end: Colors.purple)
-        .animate(_animationControllerForFavIcon.view);
-
     super.initState();
   }
 
   @override
   void dispose() {
-    _animationController.dispose();
     _animationControllerForFavIcon.dispose();
     super.dispose();
   }
@@ -104,7 +78,7 @@ class _DetailsPageState extends State<DetailsPage>
               child: ItemDetailsSectionView(
                 turn: turn,
                 isDescriptionShown: isDescriptionShown,
-                controllerForSize: sizeTemp,
+                controllerForSize: size,
                 onTapShowDescription: () {
                   setState(() {
                     turn += 0.5;
@@ -114,18 +88,11 @@ class _DetailsPageState extends State<DetailsPage>
                 isSizeSelected: isSizeSelected,
                 onTapSize: (index) {
                   setState(() {
-                    sizeTemp[index].isSelected =
-                        !(sizeTemp[index].isSelected ?? false);
+                    size[index].isSelected = !(size[index].isSelected ?? false);
                     // _animationControllerForSize.repeat();
-                    if (sizeTemp[index].isSelected == false) {
-                      sizeTemp[index].sizeAnimationController?.reverse();
-                    } else {
-                      sizeTemp[index].sizeAnimationController?.forward();
-                    }
                   });
                 },
                 size: size,
-                animationColor: colorAnimationForSize,
               ),
             ),
           ],
@@ -142,7 +109,6 @@ class ItemDetailsSectionView extends StatelessWidget {
       required this.size,
       required this.isSizeSelected,
       required this.onTapSize,
-      required this.animationColor,
       required this.turn,
       required this.controllerForSize});
 
@@ -155,7 +121,6 @@ class ItemDetailsSectionView extends StatelessWidget {
   final Function(int) onTapSize;
   final bool isSizeSelected;
 
-  final Animation<Color?> animationColor;
   final double turn;
 
   @override
@@ -196,18 +161,11 @@ class ItemDetailsSectionView extends StatelessWidget {
               itemCount: 5,
               scrollDirection: Axis.horizontal,
               itemBuilder: (context, index) {
-                return AnimatedBuilder(
-                  animation:
-                      controllerForSize[index].sizeAnimationController!.view,
-                  builder: (BuildContext context, Widget? child) {
-                    return SizeItemView(
-                      size: size?[index],
-                      index: index,
-                      isSizeSelected: size?[index].isSelected ?? false,
-                      onTapSize: onTapSize,
-                      color: controllerForSize[index].colorAnimation!.value,
-                    );
-                  },
+                return SizeItemView(
+                  size: size?[index],
+                  index: index,
+                  isSizeSelected: size?[index].isSelected ?? false,
+                  onTapSize: onTapSize,
                 );
               }),
         )
@@ -222,14 +180,12 @@ class SizeItemView extends StatelessWidget {
     required this.index,
     required this.onTapSize,
     this.isSizeSelected = false,
-    required this.color,
   });
 
   final SizeVO? size;
   final int index;
   final Function(int) onTapSize;
   final bool isSizeSelected;
-  final Color? color;
 
   @override
   Widget build(BuildContext context) {
@@ -240,11 +196,8 @@ class SizeItemView extends StatelessWidget {
             onTapSize(index);
           },
           child: AnimatedContainer(
-            duration: kAnimationDuration,
-            child: Container(
-              // margin: const EdgeInsets.all(8.0),
-              height: 60,
               width: 60,
+              height: 60,
               decoration: BoxDecoration(
                 boxShadow: [
                   BoxShadow(
@@ -254,11 +207,10 @@ class SizeItemView extends StatelessWidget {
                   ),
                 ],
                 borderRadius: BorderRadius.circular(20),
-                color: color,
+                color: isSizeSelected ? Colors.purple : Colors.white,
               ),
-              child: Center(child: Text(size?.size ?? "")),
-            ),
-          ),
+              duration: kAnimationDuration,
+              child: Center(child: Text(size?.size ?? ""))),
         ),
         SizedBox(
           width: kMARGIN18,
