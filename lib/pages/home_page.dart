@@ -21,6 +21,7 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return AnimatedContainer(
+      height: MediaQuery.of(context).size.height,
       duration: kAnimationDuration,
       color: (isChangedBackgroundColor) ? Colors.black : Colors.white,
       child: Stack(
@@ -46,77 +47,46 @@ class _HomePageState extends State<HomePage> {
                   });
                 },
               )),
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              TweenAnimationBuilder(
-                tween: Tween<double>(begin: 0, end: 1),
-                duration: kAnimationDurationForScreenFadeIn,
-                builder: (context, double _value, child) => Opacity(
-                  opacity: _value,
-                  child: Padding(
-                    padding: EdgeInsets.only(
-                        left: _value * MARGIN_MEDIUM_2,
-                        top: 150,
-                        right: MARGIN_MEDIUM_2),
-                    child: child,
-                  ),
-                ),
-                child: TrendingForYouSectionView(
-                    isChangedBackgroundColor: isChangedBackgroundColor),
+          TweenAnimationBuilder(
+            tween: Tween<double>(begin: 0, end: 1),
+            duration: kAnimationDurationForScreenFadeIn,
+            builder: (context, double _value, child) => Opacity(
+              opacity: _value,
+              child: Padding(
+                padding: EdgeInsets.only(
+                    left: _value * MARGIN_MEDIUM_2,
+                    top: 150,
+                    right: MARGIN_MEDIUM_2),
+                child: child,
               ),
-              SizedBox(
-                height: kMARGIN18,
-              ),
-              Expanded(
-                child: TweenAnimationBuilder(
-                  tween: Tween<double>(begin: 0, end: 1),
-                  duration: kAnimationDurationForScreenFadeIn,
-                  builder: (context, double _value, child) => Opacity(
-                    opacity: _value,
-                    child: Padding(
-                      padding: EdgeInsets.only(
-                        bottom: _value * 120,
-                        left: _value * MARGIN_MEDIUM_2,
-                        right: _value * MARGIN_MEDIUM_2,
-                        // top: 200,
-                      ),
-                      child: child,
-                    ),
-                  ),
-                  child: RecommendedSectionView(
-                    isChangedBackgroundColor: isChangedBackgroundColor,
-                    itemsImages: itemsImages,
-                    navigate: () {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => DetailsPage()));
-                    },
-                  ),
+            ),
+            child: TrendingForYouSectionView(
+                isChangedBackgroundColor: isChangedBackgroundColor),
+          ),
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: TweenAnimationBuilder(
+              tween: Tween<double>(begin: 0, end: 1),
+              duration: kAnimationDurationForScreenFadeIn,
+              builder: (BuildContext context, double value, Widget? child) =>
+                  Opacity(
+                opacity: value,
+                child: Padding(
+                  padding: EdgeInsets.only(bottom: value * 50,left: MARGIN_MEDIUM_2,right: MARGIN_MEDIUM_2),
+                  child: child,
                 ),
               ),
-              // ClipRRect(
-              //   borderRadius: BorderRadius.circular(35.0),
-              //   child: Container(
-              //     // padding: EdgeInsets.symmetric(horizontal: MARGIN_MEDIUM_2),
-              //     height: 60.0,
-              //     margin: const EdgeInsets.only(bottom: 6.0,left: MARGIN_MEDIUM_2,right: MARGIN_MEDIUM_2), //Same as `blurRadius` i guess
-              //     decoration: BoxDecoration(
-              //       borderRadius: BorderRadius.circular(35.0),
-              //       color: Colors.white,
-              //       boxShadow: [
-              //         BoxShadow(
-              //           color: Colors.grey,
-              //           offset: Offset(0.0, 1.0), //(x,y)
-              //           blurRadius: 6.0,
-              //         ),
-              //       ],
-              //     ),
-              //   ),
-              // ),
-            ],
+              child: RecommendedSectionView(
+                isChangedBackgroundColor: isChangedBackgroundColor,
+                itemsImages: itemsImages,
+                navigate: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => DetailsPage()));
+                },
+              ),
+            ),
           ),
           // TweenAnimationBuilder(
           //   tween: Tween<double>(begin: 0, end: 1),
@@ -125,25 +95,27 @@ class _HomePageState extends State<HomePage> {
           //     opacity: _value,
           //     child: Padding(
           //       padding: EdgeInsets.only(
-          //           bottom: _value * 100,
-          //           left: MARGIN_MEDIUM_2,
-          //           right: MARGIN_MEDIUM_2,
-          //          top: _value*550,
+          //         // bottom: _value * 120,
+          //         // top: 600,
+          //         left:   MARGIN_MEDIUM_2,
+          //         right:  MARGIN_MEDIUM_2,
+          //         // top: 200,
           //       ),
           //       child: child,
           //     ),
           //   ),
-          //   child: Container(
-          //     height: 500,
-          //     color: Colors.white60,
-          //     child: GridView.builder(
-          //         itemCount: 2,
-          //         physics: NeverScrollableScrollPhysics(),
-          //         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          //             crossAxisCount: 2, childAspectRatio: 1.4,crossAxisSpacing: 5),
-          //         itemBuilder: (context, index) {
-          //           return ItemsView(images: itemsImages, index: index);
-          //         }),
+          //   child: Align(
+          //     alignment: Alignment.bottomCenter,
+          //     child: RecommendedSectionView(
+          //       isChangedBackgroundColor: isChangedBackgroundColor,
+          //       itemsImages: itemsImages,
+          //       navigate: () {
+          //         Navigator.push(
+          //             context,
+          //             MaterialPageRoute(
+          //                 builder: (context) => DetailsPage()));
+          //       },
+          //     ),
           //   ),
           // ),
         ],
@@ -167,6 +139,7 @@ class RecommendedSectionView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
+      mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
@@ -177,28 +150,25 @@ class RecommendedSectionView extends StatelessWidget {
               fontSize: MARGIN_MEDIUM_2),
         ),
         // SizedBox(height: 16,),
-        Expanded(
-          child: Container(
-            // color: Colors.red,
-            // height: 300,
-            child: GridView.builder(
-                itemCount: 2,
-                physics: NeverScrollableScrollPhysics(),
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    childAspectRatio: 1.2,
-                    crossAxisSpacing: 16),
-                itemBuilder: (context, index) {
-                  return GestureDetector(
-                      onTap: () {
-                        navigate();
-                      },
-                      child: ItemsView(
-                        images: itemsImages,
-                        index: index,
-                      ));
-                }),
-          ),
+        Container(
+          height: 200,
+          child: GridView.builder(
+              itemCount: 2,
+              physics: NeverScrollableScrollPhysics(),
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  childAspectRatio: 1.2,
+                  crossAxisSpacing: 16),
+              itemBuilder: (context, index) {
+                return GestureDetector(
+                    onTap: () {
+                      navigate();
+                    },
+                    child: ItemsView(
+                      images: itemsImages,
+                      index: index,
+                    ));
+              }),
         ),
       ],
     );
@@ -219,7 +189,8 @@ class ItemsView extends StatelessWidget {
     );
   }
 
-  ItemsView({required this.images, required this.index});
+  const ItemsView({Key? key, required this.images, required this.index})
+      : super(key: key);
 }
 
 class TrendingForYouSectionView extends StatelessWidget {
@@ -250,7 +221,8 @@ class TrendingForYouSectionView extends StatelessWidget {
 class TrendingView extends StatelessWidget {
   final bool isChangedBackgroundColor;
 
-  TrendingView({required this.isChangedBackgroundColor});
+  const TrendingView({Key? key, required this.isChangedBackgroundColor})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -406,8 +378,9 @@ class ChangeThemeButtonView extends StatelessWidget {
   final Function onTapChangeThemeButton;
   final Color color;
 
-  ChangeThemeButtonView(
-      {required this.onTapChangeThemeButton, required this.color});
+  const ChangeThemeButtonView(
+      {Key? key, required this.onTapChangeThemeButton, required this.color})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
