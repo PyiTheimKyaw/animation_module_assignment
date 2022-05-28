@@ -89,7 +89,6 @@ class _DetailsPageState extends State<DetailsPage>
                 onTapSize: (index) {
                   setState(() {
                     size[index].isSelected = !(size[index].isSelected ?? false);
-                    // _animationControllerForSize.repeat();
                   });
                 },
                 size: size,

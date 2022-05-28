@@ -72,7 +72,10 @@ class _HomePageState extends State<HomePage> {
                   Opacity(
                 opacity: value,
                 child: Padding(
-                  padding: EdgeInsets.only(bottom: value * 50,left: MARGIN_MEDIUM_2,right: MARGIN_MEDIUM_2),
+                  padding: EdgeInsets.only(
+                      bottom: value * 50,
+                      left: MARGIN_MEDIUM_2,
+                      right: MARGIN_MEDIUM_2),
                   child: child,
                 ),
               ),
@@ -80,44 +83,12 @@ class _HomePageState extends State<HomePage> {
                 isChangedBackgroundColor: isChangedBackgroundColor,
                 itemsImages: itemsImages,
                 navigate: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => DetailsPage()));
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => DetailsPage()));
                 },
               ),
             ),
           ),
-          // TweenAnimationBuilder(
-          //   tween: Tween<double>(begin: 0, end: 1),
-          //   duration: kAnimationDurationForScreenFadeIn,
-          //   builder: (context, double _value, child) => Opacity(
-          //     opacity: _value,
-          //     child: Padding(
-          //       padding: EdgeInsets.only(
-          //         // bottom: _value * 120,
-          //         // top: 600,
-          //         left:   MARGIN_MEDIUM_2,
-          //         right:  MARGIN_MEDIUM_2,
-          //         // top: 200,
-          //       ),
-          //       child: child,
-          //     ),
-          //   ),
-          //   child: Align(
-          //     alignment: Alignment.bottomCenter,
-          //     child: RecommendedSectionView(
-          //       isChangedBackgroundColor: isChangedBackgroundColor,
-          //       itemsImages: itemsImages,
-          //       navigate: () {
-          //         Navigator.push(
-          //             context,
-          //             MaterialPageRoute(
-          //                 builder: (context) => DetailsPage()));
-          //       },
-          //     ),
-          //   ),
-          // ),
         ],
       ),
     );
